@@ -1,23 +1,23 @@
-(* Michaël PÉRIN, Verimag / Université Grenoble-Alpes, Février 2017 
+(* Michaï¿½l Pï¿½RIN, Verimag / Universitï¿½ Grenoble-Alpes, Fï¿½vrier 2017
  *
  * Part of the project TURING MACHINES FOR REAL
  *
  * Operation on bit vectors  parmaterized by the representation of bits (using functor)
- * 
+ *
  * - Requires an instranciation of a Bit module defining Two_Values zero and unit
  *
  * - How to use it ? Have a look at the DEMO
  *
  *)
-  
+
 open Pretty
 
-  
+
 (* REPRESENTATION OF BIT *)
-  
+
 module type Two_Values_Sig =
   sig
-    type t 
+    type t
     val zero:t
     val unit:t
     val pretty: t -> string
@@ -28,7 +28,7 @@ module Bit_as_Int : Two_Values_Sig =
     type t = int
     let (zero:t) = 0
     let (unit:t) = 1
-    let (pretty: t -> string) = string_of_int 
+    let (pretty: t -> string) = string_of_int
   end
 
 module Bit_as_Boolean : Two_Values_Sig =
@@ -40,36 +40,40 @@ module Bit_as_Boolean : Two_Values_Sig =
   end
 
 
-    
-(* BIT VECTOR *)    
-    
+
+(* BIT VECTOR *)
+
 module Made_Of = functor (Bit : Two_Values_Sig) ->
   (struct
 
     type bit = Bit.t
     type 'a vector = 'a list
     type 'a vectors = ('a list) list
-	  
+
     type t = bit vector
 
     let (pretty: bit vector -> string) = fun bits ->
 	  Pretty.tuple Bit.pretty bits
-	    
+
     let (print: bit vector -> unit) = fun bits ->
 	  print_string (pretty bits)
 
     let (prettys: (bit vector) list -> string) = fun bits_list ->
 	  Pretty.list pretty bits_list
-	    
-   (* CONVERSION int <-> bit vector (Little endian encoding: the less significant bit is on the left) *) 
 
-    let (nb_bits_for: int -> int) = fun i -> 
+   (* CONVERSION int <-> bit vector (Little endian encoding: the less significant bit is on the left) *)
+
+    let (nb_bits_for: int -> int) = fun i ->
 	  let rec (nb_bits_rec: (int * int) -> int) = fun (p,n) ->
 		if i<= n then p
 		else nb_bits_rec (p+1,2*n)
-	  in nb_bits_rec (1,2) 
-      
-    let rec (int_to_bits: int -> t) = 
+	  in nb_bits_rec (1,2)
+
+
+
+(*fonction qui a  un int, associe un vecteur de bits en little endian, par exemple
+int_to_bits(2) -> [0,1]*)
+    let rec (int_to_bits: int -> t) =
 	  function
 	    | 0 -> [ Bit.zero ]
 	    | 1 -> [ Bit.unit ]
@@ -77,7 +81,7 @@ module Made_Of = functor (Bit : Two_Values_Sig) ->
 		    let r = i mod 2 and half_i = i / 2 in
 		      (if r=0 then Bit.zero else Bit.unit) :: (if half_i=0 then [] else int_to_bits half_i)
 
-								
+(*fonction qui a un vecteur de bits associe l'int qui va avec*)
     let (bits_to_int: t -> int option) = fun bits ->
 	  let rec
 	      (horner: int -> t -> int) = fun int ->
@@ -91,18 +95,18 @@ module Made_Of = functor (Bit : Two_Values_Sig) ->
 	    match bits with
 	    | [] -> None
 	    | _  -> Some (horner 0 (List.rev bits))
-		      
+
     let (unsafe_bits_to_int: t -> int) = fun bits ->
 	  match (bits_to_int bits) with
-	  | Some int -> int 
+	  | Some int -> int
 	  | None -> assert (false)
 
 
-		      
+
    (* OPERATIONS on bit vector *)
 
    (* The operation +1 *)
-		  
+
     let rec (inc: t -> t) = fun bits ->
 	  match bits with
 	  | [] -> [Bit.unit]
@@ -111,52 +115,54 @@ module Made_Of = functor (Bit : Two_Values_Sig) ->
 		  then Bit.unit :: bits
 		  else Bit.zero :: (inc bits)
 
-				    
+
    (* The operation *2 *)
-				
+
     let (double: t -> t) = fun bits ->
 	  Bit.zero :: bits
 
    (* The operation /2 *)
-		 
+
     let (half: t -> t) = fun bits->
 	  List.tl bits
 
 
   (* ENUMERATION of bit vectors *)
-
+(*cree le vecteur de bits contenant les reprÃ©sentations des nombres en binaire de init Ã  last, ar exemple
+enumerate_from_to(1,3)  -> [(1),(0,1),(1,1)]*)
     let rec (enumerate_from_to: int -> int -> bit vectors) = fun init last ->
 	  if init>last
 	  then []
 	  else (int_to_bits init):: (enumerate_from_to (init+1) last)
-	
+
 
     (* using enumerate_x_from,  the bit vectors will all have the same size *)
-				     
+(*comme la prÃ©cÃ©dente mais en mieux, elle fait des vecteurs qui font tous la mÃªme taille,
+Ã©tudier le fonctionnement elle doit etre pas mal*)
     let rec (enumerate_x_from: int -> bit vector -> bit vectors) = fun counter initial_bit_vector ->
 	  if counter<=0 then []
 	  else initial_bit_vector :: (enumerate_x_from (counter-1) (inc initial_bit_vector))
 
     let (enumerate: int -> bit vectors) = fun n ->
 	  enumerate_x_from n (List.map (fun _ -> Bit.zero) (int_to_bits (n-1)))
-	    
+
    (* TEST *)
-				      
+
     let (check_operations_on: int -> unit) = fun i ->
 	  begin
 	    assert ( unsafe_bits_to_int (int_to_bits i) = i ) ;
 	    assert ( (inc (int_to_bits i)) = (int_to_bits (i+1)) ) ;
-	    assert ( bits_to_int (double (inc (int_to_bits i))) = (Some (2*(i+1))) ) ; 
+	    assert ( bits_to_int (double (inc (int_to_bits i))) = (Some (2*(i+1))) ) ;
 	    assert ( half (double (int_to_bits i)) = int_to_bits i ) ;
 	  end
-  
+
     let (test: unit -> unit) = fun () ->
 	  List.iter check_operations_on [0;1;2;3;4;5;6;7;8;9;10;11;12;13;14;15;16]
 
    (* DEMO *)
-	    
+
     open Tricks (* provides >> *)
-      
+
     let (demo: unit -> unit) = fun () ->
 	  begin
 	    print_string "\n\n* DEMO * Bit_Vector.ml:\n\n"
@@ -165,20 +171,17 @@ module Made_Of = functor (Bit : Two_Values_Sig) ->
 	      (enumerate_x_from (16-3+1) [Bit.unit;Bit.unit;Bit.zero;Bit.zero;Bit.zero]) >> prettys ;
 	      (enumerate_x_from 8 (int_to_bits 7)) >> prettys ;
 	      (enumerate_x_from 8 (List.map (fun _ -> Bit.zero) (int_to_bits 7))) >> prettys ;
-	      (enumerate 8) >> prettys	      	      
+	      (enumerate 8) >> prettys
 	    ]
 	      >> (String.concat "\n")
 	      >> print_string
 	  end
   end)
 
-  
+
 (* DEMO *)
 
 module BV = Made_Of(Bit_as_Boolean)
 
 let _ = BV.test () ;;
 let _ = BV.demo () ;;
-
-
-      
