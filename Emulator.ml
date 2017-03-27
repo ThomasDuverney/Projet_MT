@@ -225,20 +225,43 @@ module Binary =
     (* TRANSLATION OF BANDS *)
 
     let (encode: Band.t list -> Band.t list) =
-	(* PROJET 2017: modifiez ce code -> *) (fun x -> x)
+	(* PROJET 2017: modifiez ce code ->
+  But du jeu : Dans le type bande il y a un alphabet, il faut donc asscoier a chaque
+  element de l'alphabet un entier, puis ensuite creer une nouvelle bande, avec comme alphabet l'alphabet
+  binaire qu'on a créé, comme couleur on s'en fout et comme liste de symbole la traduction des listes de symboles
+  Du coup les fontions dont on devrait avoir besoin :
+
+  numbering_from dans MyList -> pour prendre un alphabet et associer un entier a chaque symbole
+  nb_bits_for -> une fois qu'on connait la taille de notre alphabet, elle noujs donne la taille des symboles binaires
+  pouvoir tous les reprensenter
+  enumerate_x_from dans bit vector -> fait une liste de binaires qui font tous la meme taille
+  int_to_bits dans Bit_Vector -> surement utile avec la precedente pour creer notre alphabet
+
+  Apres il va nous falloir une traductrice, pour pouvoir traduire un symbole et une traductrice pour pouvoir traduire une
+  liste de symboles
+*) (fun x -> x)
 
 
     (* REVERSE TRANSLATION *)
 
     let (decode: Band.t list -> Band.t list) =
-	(* PROJET 2017: modifiez ce code -> *) (fun x -> x)
+	(* PROJET 2017: modifiez ce code ->
+
+Normalement si on arrive a plier la precedente ca devrait aller tout seul, c'est juste l'inverse
+  *) (fun x -> x)
 
 
     (* EMULATION OF TRANSITIONS *)
 
     let (emulate_action: State.t * Action.t * State.t -> Turing_Machine.t) = fun (source,action,target) ->
 
-      (* PROJET 2017: modifiez ce code -> *)
+      (* PROJET 2017: modifiez ce code ->
+
+      Ca par contre ca ppourrait etre galere, en gros si on a une mt qui a 2^n symboles dans son alphabet,
+      il faut creer une autre MT avec 2^n+1 etats, je vous monterait en théorie c est plutot simple mais en pratique ca va
+      surement etre un peu difficile.
+
+      *)
 	  { Turing_Machine.nop with
 	    name = String.concat "" [ "Binary" ; Pretty.parentheses (Action.to_ascii action) ] ;
 	    initial = State.initial ;
