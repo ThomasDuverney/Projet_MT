@@ -273,7 +273,7 @@ Normalement si on arrive a plier la precedente ca devrait aller tout seul, c'est
     (* THE SIMULATOR *)
 
     let (* USER *) (simulator: simulator) = { name = "Binary" ; encoder = encode ;  decoder = decode ; emulator = emulate_action }
-
+(*encoding : symbol * bit_vector.t) list = List.map(fun symbols -> (symbol, f symbol)) alphabet in  ..... cf photo *)
   end)
 
 
