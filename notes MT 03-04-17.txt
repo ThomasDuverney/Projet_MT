@@ -1,0 +1,61 @@
+module Bit = B,D
+Vecteur de bits : module Bits = Bit_Vector.Made_Of(Bit)
+
+Tester le code : utiliser l'interpréteur
+-> use LC_by_MT.ml;;
+-> List.map Reduce.is_reduce_correct_on Lambda_Term.examples
+
+Voir un Lambda_Term
+-> let lt1 = Lambda_Term.example1;;
+
+Bel affichage
+-> Lambda_Term_pretty.lt1;;
+
+//pour éviter d'écrire le nom du module à chaque fois : open Lambda_Term
+Beta réduction : Lambda_Term.reduce
+
+Créer une bande à partir d'un lambda terme :
+open LC_by_MT.Reduce;;
+band_from lt1;;
+
+Le lambda terme (x1 x0) doit renvoyer la bande (|x|U|x|Z)
+
+A implémenter : 
+a_turing_machine_that_beta_reduces_lambda_term (dans LC_by_MT : is_reduced_correct_on)
+(renvoie nop pour l'instant)
+
+is_reduced_correct_on :
+term1 = lambda terme passé en paramètre réduit par une fonction existante
+band 1 = MT représentant term1
+term2 = lambda terme passé en paramètre réduit avec NOTRE MT
+band2 = bande de term 2
+
+compare band1 et band2 : permet de tester si notre MT marche
+
+Tips sur les commandes exécutables dans l'interpréteur : voir Makefile
+
+Etats : init = q1
+		accept = q0
+		reject = q(-1)
+
+Pipe en caml : >>
+
+Ex : enlever le dernier élément d'une liste 
+let but_last `a list -> `a list = fun l ->
+	list.rev(list.tail(list.rev l))
+	ou
+	l >> list.rev >> list.tail >> list.rev
+	ou
+	let rec but_last : `a list -> `a list = fun l ->
+		match l with
+		| [] -> failwith "MyList.but_last: empty_list"
+		| [x] -> []
+		| x :: xs -> x :: (but_last xs)
+
+avec type `a list =
+		| []
+		| `a :: `a list
+
+=> type récursif
+=> toutes les fonctions qui utilisent un type récursif seront récursives ! (rec)
+
