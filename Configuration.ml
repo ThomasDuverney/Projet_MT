@@ -15,7 +15,7 @@ open Action
 open Transition
 open Turing_Machine
   
-
+  
 type status = Running | Final
   
 type configuration = { tm: Turing_Machine.t ;
@@ -39,7 +39,7 @@ module Configuration =
 
     let make ?time:(time=false) : (Turing_Machine.t -> Band.t list -> configuration) = fun tm bands ->
 	  let
-	      filename = if time then begin Date.sleep_for 0.1 ; String.concat "_" [ Date.pretty_time() ; name tm bands ] end else name tm bands 
+	      filename = (* if time then begin Date.sleep_for 0.1 ; String.concat "_" [ Date.pretty_time() ; name tm bands ] end else *) name tm bands 
 	  in
 	  { tm = tm ;
 	    bands = bands ;
