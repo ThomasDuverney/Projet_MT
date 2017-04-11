@@ -1,4 +1,4 @@
-# Michaël PÉRIN, Verimag / Université Grenoble-Alpes, Février 2017 
+# Michaël PÉRIN, Verimag / Université Grenoble-Alpes, Février 2017
 #
 # Part of the project TURING MACHINES FOR REAL
 #
@@ -10,7 +10,8 @@ MODULES = Fresh Lambda_Calcul Option Tricks MyList MyString Pretty Bit_Vector Da
 
 ML  = $(addsuffix  .ml, $(MODULES))
 CMO = $(addsuffix .cmo, $(MODULES))
-CMA = graphics.cma unix.cma
+CMA = unix.cma
+#/!\ graphics.cma is not available on all distribution
 
 # The compiler with option
 OCAMLC = ocamlc -w -8 -w -26
@@ -36,7 +37,7 @@ cmo: $(ML) main.ml
 play: $(log_dir)
 	@make cmo
 	@echo "#use \"main.ml\";;" > .ledit_history
-	@ledit ocaml $(CMA) $(CMO) 
+	@ledit ocaml $(CMA) $(CMO)
 
 run: $(log_dir)
 	@make cmo
@@ -51,7 +52,7 @@ clean:
 	@camlp4o -impl $< -o $@
 
 %.cmo: %.ml
-	@ocamlc *.cmo $< 
+	@ocamlc *.cmo $<
 
 $(log_dir):
 	@if test ! -d $(log_dir); then mkdir $(log_dir)/; fi
