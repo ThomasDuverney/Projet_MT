@@ -6,7 +6,7 @@
 SOL =
 #
 
-MODULES = Fresh Lambda_Calcul Option Tricks MyList MyString Pretty Bit_Vector Date Logger Color Html Pattern Symbol State Alphabet Band Action Transition Turing_Machine Configuration Execution LC_by_MT Demo Emulator $(SOL)
+MODULES = Bytes Fresh Lambda_Calcul Option Tricks MyList MyString Pretty Bit_Vector Date Logger Color Html Pattern Symbol State Alphabet Band Action Transition Turing_Machine Configuration Execution LC_by_MT Demo Emulator $(SOL)
 
 ML  = $(addsuffix  .ml, $(MODULES))
 CMO = $(addsuffix .cmo, $(MODULES))
