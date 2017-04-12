@@ -140,7 +140,7 @@ open Action
 open Band
 open Transition
 open Turing_Machine
-
+open MyList
 (* An example of a useless but correct translation that splits the effect of a transition into three steps
 
    (q) -- l / e : d --> (q')
@@ -232,20 +232,24 @@ struct
 
   (** NEW 27/03/2107 *)
 
-  let build_encoding : Alphabet.t -> encoding
-  (* PROJET 2017: modifiez ce code -> *)
-    = fun alphabet ->
-      let symbol_to_bits : Symbol.t -> Bits.t
-        = fun symbol -> [ Bit.zero ; Bit.unit ]
-      in
-      List.map (fun symbol -> (symbol, symbol_to_bits symbol)) alphabet.symbols
-
+  (* Fonction qui prend un symbole
+  let symbol_to_bits : Symbol.t -> Bits.t =*)
+  let bit_to_symbol : Bit.t -> Symbol.t = fun bit -> match bit with zero -> B | unit -> D ;;
+  (* Parcours* l'aphabet et associe un vecteur de bit à chaque symbols grâce à la fonction symbol_to_bits *)
+  let build_encoding : Alphabet.t -> encoding =
+  fun alphabet -> map_on alphabet.symbols (fun symbol -> (symbol, [](*symbol_to_bits symbol*)));;
 
   (** MODIFIED 27/03/2107 *)
   let encode_with : encoding -> Band.t list -> Band.t list
-  (* PROJET 2017: modifiez ce code -> *)
     = fun encoding ->
-      (fun bands -> bands)
+      fun bands -> map_on bands (fun band -> { empty with
+
+          left = map_on band.left (fun symbol -> Vector (map_on (List.assoc symbol encoding) bit_to_symbol)) ;
+          head = Vector (map_on (List.assoc band.head encoding) bit_to_symbol) ;
+          right = map_on band.right (fun symbol -> Vector (map_on (List.assoc symbol encoding) bit_to_symbol)) ;
+          alphabet = { symbols = [B;D]; symbol_size_in_bits = band.alphabet.symbol_size_in_bits}
+      });;
+
 
 
   (* REVERSE TRANSLATION *)
