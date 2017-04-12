@@ -231,6 +231,8 @@ struct
   type encoding = (Symbol.t * Bits.t) list
 
   (** NEW 27/03/2107 *)
+  (*Fonction renvoie la taille d'une liste. Utile pour la suite avec la fonction enumerate*)
+  let length : 'a list -> int = fun l -> List.fold_left (fun acc e -> succ acc) 0 l ;;
 
   (* Fonction qui prend un symbole
   let symbol_to_bits : Symbol.t -> Bits.t =*)
@@ -251,14 +253,19 @@ struct
       });;
 
 
-
   (* REVERSE TRANSLATION *)
 
   (** MODIFIED 27/03/2107 *)
   let decode_with : encoding -> Band.t list -> Band.t list
   (* PROJET 2017: modifiez ce code -> *)
     = fun encoding ->
-      (fun bands -> bands)
+    fun bands -> map_on bands (fun band -> { empty with
+
+        left =  band.left(*A COMPLETER*);
+        head = band.head(*A COMPLETER*);
+        right = band.right(*A COMPLETER*);
+        alphabet = band.alphabet(*A COMPLETER*);
+    });;
 
 
   (* EMULATION OF TRANSITIONS *)
