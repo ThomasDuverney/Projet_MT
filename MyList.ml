@@ -117,6 +117,7 @@ let bool_op op l = List.fold_right (fun b acc -> op b acc) l (op true false)
       |	[e] -> []
       |	e::es -> e::(remove_last es)
 
+     ()* *
     let rassoc e l = List.assoc e (List.map (fun (x,y) -> (y,x)) l)
 
     let split_on_with equal elt l =

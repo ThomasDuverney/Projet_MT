@@ -141,6 +141,7 @@ open Band
 open Transition
 open Turing_Machine
 open MyList
+open Bit_Vector
 (* An example of a useless but correct translation that splits the effect of a transition into three steps
 
    (q) -- l / e : d --> (q')
@@ -230,25 +231,37 @@ struct
   (** NEW 27/03/2107 *)
   type encoding = (Symbol.t * Bits.t) list
 
+  let rec map_on_bits : Bits.t -> (Bit.t -> Symbol.t) -> Symbol.t list = fun bits f ->
+  match bits with
+  |[] -> print_endline "" ; []
+  |h::t -> print_string ((Symbol.pretty h) ^ " ") ; (f h) :: map_on t f ;;
+
+
   (** NEW 27/03/2107 *)
   (*Fonction renvoie la taille d'une liste. Utile pour la suite avec la fonction enumerate*)
   let length : 'a list -> int = fun l -> List.fold_left (fun acc e -> succ acc) 0 l ;;
-
   (* Fonction qui prend un symbole
   let symbol_to_bits : Symbol.t -> Bits.t =*)
-  let bit_to_symbol : Bit.t -> Symbol.t = fun bit -> match bit with zero -> B | unit -> D ;;
+
   (* Parcours* l'aphabet et associe un vecteur de bit à chaque symbols grâce à la fonction symbol_to_bits *)
   let build_encoding : Alphabet.t -> encoding =
-  fun alphabet -> map_on alphabet.symbols (fun symbol -> (symbol, [](*symbol_to_bits symbol*)));;
+  let bit_as_boolean_to_bit : Bit_as_Boolean.t -> Bit.t =
+  fun bit -> match Bit_as_Boolean.pretty bit with "0" -> Bit.zero | "1" -> Bit.unit in
+  (*fun alphabet -> map_on alphabet.symbols (fun symbol -> (symbol, [](*symbol_to_bits symbol*)));;*)
+  fun alphabet -> zip alphabet.symbols (map_on (BV.enumerate (List.length alphabet.symbols))
+  (fun vec_bit -> map_on vec_bit bit_as_boolean_to_bit)) ;;
 
   (** MODIFIED 27/03/2107 *)
   let encode_with : encoding -> Band.t list -> Band.t list
     = fun encoding ->
-      fun bands -> map_on bands (fun band -> { empty with
+      fun bands ->
 
-          left = map_on band.left (fun symbol -> Vector (map_on (List.assoc symbol encoding) bit_to_symbol)) ;
-          head = Vector (map_on (List.assoc band.head encoding) bit_to_symbol) ;
-          right = map_on band.right (fun symbol -> Vector (map_on (List.assoc symbol encoding) bit_to_symbol)) ;
+      let bit_to_symbol : Bit.t -> Symbol.t = fun bit -> match bit with zero -> B | unit -> D in
+      map_on bands (fun band -> { empty with
+
+          left = map_on band.left (fun symbol -> Vector (map_on_bits (List.assoc symbol encoding) bit_to_symbol)) ;
+          head = Vector (map_on_bits (List.assoc band.head encoding) bit_to_symbol) ;
+          right = map_on band.right (fun symbol -> Vector (map_on_bits (List.assoc symbol encoding) bit_to_symbol)) ;
           alphabet = { symbols = [B;D]; symbol_size_in_bits = band.alphabet.symbol_size_in_bits}
       });;
 
@@ -299,14 +312,17 @@ end
 
 open Alphabet
 
-let (demo: unit -> unit) = fun () ->
+let (demo: unit -> Band.t list) = fun () ->
   let alphabet = Alphabet.make [B;Z;U] in
   let band = Band.make alphabet [U;U;Z;U] in
   let tm = Turing_Machine.incr in
   let cfg = Configuration.make tm [ band ] in
-  let _final_cfg = Simulator.log_run_using
-      ([ (* Split.simulator ; *)
+  let _final_cfg = Simulator.log_run_using in
+  let sim = Binary.make_simulator alphabet in
+  sim.encoder [band] ;;
+
+     (*) ([ (* Split.simulator ; *)
         (** MODIFIED 27/03/2107 *) Binary.make_simulator alphabet
       ],[])
       cfg
-  in ()
+  in ()*)
