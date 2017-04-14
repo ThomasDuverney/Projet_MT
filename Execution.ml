@@ -1,28 +1,28 @@
-(* Michaël PÉRIN, Verimag / Université Grenoble-Alpes, Février 2017 
+(* Michaï¿½l Pï¿½RIN, Verimag / Universitï¿½ Grenoble-Alpes, Fï¿½vrier 2017
  *
  * Part of THE TURING MACHINE FOR REAL
  *
- * Execution of a Turing Machine (single band or multi-bands TM) 
+ * Execution of a Turing Machine (single band or multi-bands TM)
  *
  *)
-  
+
 open Tricks
-  
-open State  
-open Band    
+
+open State
+open Band
 open Action
 open Transition
 open Turing_Machine
-open Configuration  
+open Configuration
 open Transition
 
-(* PROJECT 2015 *) 
+(* PROJECT 2015 *)
 
 module Execution =
   (struct
 
     type log = Logger.t list
-  
+
     let (select_enabled_transition: Turing_Machine.t -> Configuration.t -> Transition.t option) = fun tm cfg ->
 	  let
 	      enabled_transitions = List.filter (Configuration.is_transition_enabled_on cfg) tm.transitions
@@ -36,21 +36,21 @@ module Execution =
 			  [ error ; cfg.tm.name ; String.concat "\n - " (List.map Transition.pretty transitions) ]
 		      in begin print_string msg ; failwith error  end
 
-	  
+
    (* mutually recursives functions to deal with the instruction Machine(TM name)  *)
 
     let rec (execute_instruction_on_one_band: log -> instruction -> Band.t -> Band.t) = fun log instruction band ->
 	  List.hd (execute_instruction log instruction [band])
-	    
+
     and (execute_instruction: log -> instruction -> Band.t list -> Band.t list) = fun log instruction bands ->
 	  match instruction with
 	  | Action action -> Action.perform action bands
-         
+
 	  | Run tm -> (* one reason of mutual recursivity: "run" calls "perform" which can call "run" *)
 		  let final_cfg = log_run ~log:log (Configuration.make tm bands) in final_cfg.bands
-		      
+
 	  | Call name -> run_tm_named name bands
-		    
+
 	  | Seq [] -> bands
 	  | Seq (inst::instructions) -> bands >> (execute_instruction log inst) >> (execute_instruction log (Seq instructions))
 
@@ -58,9 +58,9 @@ module Execution =
 		  List.map
 		    (fun (inst,band) -> execute_instruction_on_one_band log inst band)
 		    (Instruction.zip instructions bands)
-	    
+
     and (execute_transition: log -> Transition.t -> Configuration.t -> Configuration.t) = fun log (_,instruction,target) cfg ->
-	  { cfg with bands = execute_instruction log instruction cfg.bands ; state = target } 
+	  { cfg with bands = execute_instruction log instruction cfg.bands ; state = target }
 
     and (one_step: int * log -> Configuration.t -> Configuration.t) = fun (call_depth,log) cfg ->
 	  begin
@@ -72,8 +72,14 @@ module Execution =
 	  end
 
     and log_run ?call_depth:(call_depth=2) ?log:(log=[]) : (Configuration.t -> Configuration.t) = fun cfg ->
+      cfg.logger#print "<!DOCTYPE html>\n<html>\n\t<meta charset=\"utf-8\">
+  <title>DÃ©roulement de la machine</title>
+  <link rel=\"stylesheet\" href=\"style.css\">
+  <script src=\"script_machine.js\"></script>
+</head>";
 	  let final_cfg = run (call_depth, cfg.logger::log) cfg in
 	    begin
+          cfg.logger#print "</html>";
 	      cfg.logger#close ;
 	      final_cfg
 	    end
@@ -84,11 +90,10 @@ module Execution =
 	  else
 	    let next_cfg = one_step log cfg
 	    in run log next_cfg
-	      
+
     and (run_tm_named: string -> Band.t list -> Band.t list) = fun name bands ->
 	  let tm = Turing_Machine.i_find_tm_named name in
 	    let final_cfg = run (1,[]) (Configuration.make ~time:true tm bands)
 	    in  final_cfg.bands
 
   end)
-

@@ -333,7 +333,7 @@ module Turing_Machine =
 			(head, Parallel [ Action(Nop) ; Run(left_most) ], accept)
 		      ]
 		  }
-  (** CAAAAAAAAAAAAAAAAAAAAAAAAAAMEEEEEEEEEEEEEEEEEEEEEEL **)
+
     let (check_parenthesis:turing_machine) =
       let init = nop.initial and accept = nop.accept  and reject = nop.reject in
 	let q = State.fresh_from init in
@@ -342,19 +342,21 @@ module Turing_Machine =
 	    name = "check_parenthesis" ;
 	    transitions =
 	    [
+         (init, Action( Simultaneous [ RWM (Match(VAL B), No_Write, Here) ; RWM (Match(VAL B), No_Write, Here) ]), accept) ;
 	     (init, Action( Simultaneous [ RWM (Match(VAL O), No_Write, Right) ; RWM (Match(VAL B), Write O, Right) ]), Q 2) ;
-         (init, Action( Simultaneous [ RWM (Match(BUT O), No_Write, Here) ; RWM (Match(VAL B), No_Write, Here) ]), reject) ;
+         (init, Action( Simultaneous [ RWM (Match(OUT [O;B]), No_Write, Here) ; RWM (Match(VAL B), No_Write, Here) ]), reject) ;
          (Q 2, Action( Simultaneous [ RWM (Match(OUT [O;C;B]), No_Write, Right) ; RWM (Match(VAL B), No_Write, Here) ]), Q 2) ;
          (Q 2, Action( Simultaneous [ RWM (Match(VAL O), No_Write, Right) ; RWM (Match(VAL B), Write O, Right) ]), Q 2) ;
          (Q 2, Action( Simultaneous [ RWM (Match(VAL C), No_Write, Right) ; RWM (Match(VAL B), No_Write, Left) ]), Q 3) ;
          (Q 3, Action( Simultaneous [ RWM (Match(ANY), No_Write, Here) ; RWM (Match(VAL O), Write B , Here) ]), Q 2) ;
+         (Q 3, Action( Simultaneous [ RWM (Match(ANY), No_Write, Here) ; RWM (Match(VAL B), No_Write , Here) ]), reject) ;
          (Q 2, Action( Simultaneous [ RWM (Match(VAL B), No_Write, Here) ; RWM (Match(VAL B), No_Write, Left) ]), Q 4) ;
          (Q 4, Action( Simultaneous [ RWM (Match(ANY), No_Write, Here) ; RWM (Match(BUT B), No_Write, Here) ]), reject) ;
          (Q 4, Action( Simultaneous [ RWM (Match(VAL B), No_Write, Here) ; RWM (Match(VAL B), No_Write, Here) ]), accept) ;
 	     (q, Parallel [ Run(left_most) ; Run(left_most) ], accept)
 	   ]
 	  }
- 
+
       let (xor:turing_machine) =
         let init = nop.initial and accept = nop.accept in
     let q = State.fresh_from init in

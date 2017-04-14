@@ -246,8 +246,9 @@ struct
   (* Parcours* l'aphabet et associe un vecteur de bit à chaque symbols grâce à la fonction symbol_to_bits *)
   let build_encoding : Alphabet.t -> encoding =
   let bit_as_boolean_to_bit : Bit_as_Boolean.t -> Bit.t =
-  fun bit -> match Bit_as_Boolean.pretty bit with "0" -> Bit.zero | "1" -> Bit.unit in
-  (*fun alphabet -> map_on alphabet.symbols (fun symbol -> (symbol, [](*symbol_to_bits symbol*)));;*)
+  fun bit -> match Bit_as_Boolean.pretty bit with
+  "0" -> Bit.zero | "1" -> Bit.unit in
+
   fun alphabet -> zip alphabet.symbols (map_on (BV.enumerate (List.length alphabet.symbols))
   (fun vec_bit -> map_on vec_bit bit_as_boolean_to_bit)) ;;
 
@@ -274,11 +275,31 @@ struct
     = fun encoding ->
     fun bands -> map_on bands (fun band -> { empty with
 
-        left =  band.left(*A COMPLETER*);
+        left =  band.left ;
         head = band.head(*A COMPLETER*);
         right = band.right(*A COMPLETER*);
         alphabet = band.alphabet(*A COMPLETER*);
     });;
+
+    (*  let decode_with : encoding -> Band.t list -> Band.t list
+           let vector_to_bits : Symbol.t -> Bits.t = fun vec_sym -> let Vector bits = vec_sym in bits in
+        = fun encoding ->
+        fun bands ->
+         map_on bands (fun band -> { empty with
+
+            left =  map_on band.left vector_to_bits ;
+            head = band.head;
+            right = band.right;
+            alphabet = band.alphabet;
+        });;*)
+
+    let build_encoding : Alphabet.t -> encoding =
+    let bit_as_boolean_to_bit : Bit_as_Boolean.t -> Bit.t =
+    fun bit -> match Bit_as_Boolean.pretty bit with
+    "0" -> Bit.zero | "1" -> Bit.unit in
+
+    fun alphabet -> zip alphabet.symbols (map_on (BV.enumerate (List.length alphabet.symbols))
+    (fun vec_bit -> map_on vec_bit bit_as_boolean_to_bit)) ;;
 
 
   (* EMULATION OF TRANSITIONS *)
@@ -312,14 +333,15 @@ end
 
 open Alphabet
 
+(* let _final_cfg = Simulator.log_run_using in *)
+
 let (demo: unit -> Band.t list) = fun () ->
   let alphabet = Alphabet.make [B;Z;U] in
   let band = Band.make alphabet [U;U;Z;U] in
   let tm = Turing_Machine.incr in
   let cfg = Configuration.make tm [ band ] in
-  let _final_cfg = Simulator.log_run_using in
   let sim = Binary.make_simulator alphabet in
-  sim.encoder [band] ;;
+  sim.encoder cfg.bands ;;
 
      (*) ([ (* Split.simulator ; *)
         (** MODIFIED 27/03/2107 *) Binary.make_simulator alphabet
